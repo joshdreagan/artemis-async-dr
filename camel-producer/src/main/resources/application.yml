@@ -1,0 +1,20 @@
+# AMQPHub
+amqphub:
+  amqp10jms:
+    pool:
+      enabled: true
+    remote-url: amqp://localhost:61616
+    #username: admin
+    #password: admin
+
+# Camel Spring Boot
+camel:
+  springboot:
+    name: camel-producer
+    main-run-controller: true
+
+# Logging
+logging:
+  level:
+    root: ERROR
+    #org.apache.camel.examples: DEBUG

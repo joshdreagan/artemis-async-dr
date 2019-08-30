@@ -1,0 +1,33 @@
+# Spring Boot
+spring:
+  banner:
+    location: banner.txt
+  datasource:
+    url: jdbc:mysql://localhost:3306/example?autoReconnect=true&useSSL=false
+    username: root
+    password: Abcd1234
+
+# AMQPHub
+amqphub:
+  amqp10jms:
+    pool:
+      enabled: true
+    remote-url: amqp://localhost:61616
+    #username: admin
+    #password: admin
+
+# Camel Spring Boot
+camel:
+  springboot:
+    name: camel-consumer
+    main-run-controller: true
+
+# Logging
+logging:
+  level:
+    root: ERROR
+    #org.apache.camel.examples: DEBUG
+    
+consumer:
+  notification:
+    topic-name: notification.idempotent-consumer

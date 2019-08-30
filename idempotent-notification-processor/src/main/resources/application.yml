@@ -1,0 +1,43 @@
+# Servlet Container & Health Setup
+server:
+  address: 0.0.0.0
+management:
+  server:
+    address: 0.0.0.0
+    port: 8081
+  endpoints:
+    enabled-by-default: false
+    health:
+      enabled: true
+
+# Spring Boot
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/example?autoReconnect=true&useSSL=false
+    username: root
+    password: Abcd1234
+
+# AMQPHub
+amqphub:
+  amqp10jms:
+    pool:
+      enabled: true
+    remote-url: amqp://localhost:61616
+    #username: admin
+    #password: admin
+
+# Camel Spring Boot
+camel:
+  springboot:
+    name: idempotent-notification-processor
+
+# Logging
+logging:
+  level:
+    #root: ERROR
+    org.apache.camel.examples: DEBUG
+    
+consumer:
+  notification:
+    topic-name: notification.idempotent-consumer
+    application-name: camel-consumer
