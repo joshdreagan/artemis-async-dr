@@ -13,6 +13,7 @@
  */
 package org.apache.activemq.examples;
 
+import java.util.Map;
 import org.apache.activemq.artemis.api.core.Message;
 import org.apache.activemq.artemis.core.server.transformer.Transformer;
 import org.slf4j.Logger;
@@ -22,15 +23,27 @@ public class AddMessageOriginTransformer implements Transformer {
   
   private static final Logger log = LoggerFactory.getLogger(AddMessageOriginTransformer.class);
 
+  private static final String MESSAGE_ORIGIN_HEADER = "ARTEMIS_MESSAGE_ORIGIN";
+
+  private String messageOrigin;
+
+  public String getMessageOrigin() {
+    return messageOrigin;
+  }
+
+  public void setMessageOrigin(String messageOrigin) {
+    this.messageOrigin = messageOrigin;
+  }
+
+  @Override
+  public void init(Map<String, String> properties) {
+    this.setMessageOrigin(properties.get("messageOrigin"));
+  }
+  
   @Override
   public Message transform(Message msg) {
-    String clusterName = System.getenv("ARTEMIS_CLUSTER_NAME");
-    if (clusterName != null && !clusterName.isEmpty()) {
-      log.debug(String.format("Setting the ARTEMIS_MESSAGE_ORIGIN header to value [%s].", clusterName));
-      msg.putStringProperty("ARTEMIS_MESSAGE_ORIGIN", clusterName);
-    } else {
-      log.debug("Unable to set the ARTEMIS_MESSAGE_ORIGIN header. The ARTEMIS_CLUSTER_NAME environment variable is not set.");
-    }
+    log.debug(String.format("Setting the %s header to value [%s].", MESSAGE_ORIGIN_HEADER, messageOrigin));
+    msg.putStringProperty(MESSAGE_ORIGIN_HEADER, messageOrigin);
     return msg;
   }
 }

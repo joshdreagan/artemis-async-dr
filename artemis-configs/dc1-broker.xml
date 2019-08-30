@@ -241,7 +241,10 @@ under the License.
             <queue-name>mirror.dc2.FOO</queue-name>
             <forwarding-address>FOO</forwarding-address>
             <ha>true</ha>
-            <transformer-class-name>org.apache.activemq.examples.AddMessageOriginTransformer</transformer-class-name>
+            <transformer>
+              <class-name>org.apache.activemq.examples.AddMessageOriginTransformer</class-name>
+              <property key="messageOrigin" value="dc1"/>
+            </transformer>
             <failover-on-server-shutdown>true</failover-on-server-shutdown>
             <static-connectors>
                <connector-ref>dc2-connector</connector-ref>
@@ -251,8 +254,11 @@ under the License.
             <queue-name>mirror.dc2.notification.idempotent-consumer</queue-name>
             <forwarding-address>notification.idempotent-consumer</forwarding-address>
             <ha>true</ha>
-            <transformer-class-name>org.apache.activemq.examples.AddMessageOriginTransformer</transformer-class-name>
-            <failover-on-server-shutdown>true</failover-on-server-shutdown>
+            <transformer>
+               <class-name>org.apache.activemq.examples.AddMessageOriginTransformer</class-name>
+               <property key="messageOrigin" value="dc1"/>
+             </transformer>
+             <failover-on-server-shutdown>true</failover-on-server-shutdown>
             <static-connectors>
                <connector-ref>dc2-connector</connector-ref>
             </static-connectors>
