@@ -93,6 +93,7 @@ keytool -import -alias dc2-broker -keystore client.ts -file dc2_broker_cert
 
 - Configure each DC/namespace
 
+```
 oc project dc1 ## Or 'oc login <dc1>'
 oc create secret generic broker-amq-secret --from-literal=username=client --from-literal=password=password --from-literal=cluster-username=cluster --from-literal=cluster-password=password --from-literal=truststore-password=password --from-literal=keystore-password=password --from-file=broker.ts=dc1-broker.ts --from-file=broker.ks=dc1-broker.ks
 oc create configmap broker-amq-configmap --from-file=broker.xml=dc1-broker.xml
