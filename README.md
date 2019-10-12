@@ -115,6 +115,7 @@ oc apply -f dc2-deploymentconfig.yaml ## Make sure to change the  'spec.template
 
 ```
 cd $PROJECT_ROOT/idempotent-notification-processor
+
 oc project dc1 ## Or 'oc login <dc1>'
 mvn -P openshift clean install fabric8:deploy
 
