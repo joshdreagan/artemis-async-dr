@@ -30,6 +30,8 @@ limitations under the License.
 
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
+    
+    <fabric8-maven-plugin.version>3.5.41</fabric8-maven-plugin.version>
 
     <camel.version>2.23.2</camel.version>
     <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
@@ -121,5 +123,32 @@ limitations under the License.
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>openshift</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>fabric8-maven-plugin</artifactId>
+            <version>${fabric8-maven-plugin.version}</version>
+            <configuration>
+              <generateRoute>false</generateRoute>
+            </configuration>
+            <executions>
+              <execution>
+                <id>fabric8</id>
+                <goals>
+                  <goal>resource</goal>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

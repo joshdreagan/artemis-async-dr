@@ -1,0 +1,224 @@
+<?xml version='1.0'?>
+<configuration xmlns="urn:activemq"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xi="http://www.w3.org/2001/XInclude"
+               xsi:schemaLocation="urn:activemq /schema/artemis-configuration.xsd">
+
+   <core xmlns="urn:activemq:core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="urn:activemq:core ">
+
+      <name>broker</name>
+
+      <persistence-enabled>true</persistence-enabled>
+
+      <journal-type>NIO</journal-type>
+
+      <paging-directory>/opt/amq/data/paging</paging-directory>
+
+      <bindings-directory>/opt/amq/data/bindings</bindings-directory>
+
+      <journal-directory>/opt/amq/data/journal</journal-directory>
+
+      <large-messages-directory>/opt/amq/data/large-messages</large-messages-directory>
+
+      <journal-datasync>true</journal-datasync>
+
+      <journal-min-files>2</journal-min-files>
+
+      <journal-pool-files>10</journal-pool-files>
+
+      <journal-device-block-size>4096</journal-device-block-size>
+
+      <journal-file-size>10M</journal-file-size>
+
+      <journal-buffer-timeout>0</journal-buffer-timeout>
+
+      <journal-max-io>1</journal-max-io>
+
+      <connectors>
+         <connector name="artemis">tcp://broker-amq-0.broker-amq-headless.dc1.svc.cluster.local:61616</connector>
+         <connector name="dc2-connector">tcp://broker-amq-headless-dc2.192.168.99.102.nip.io:443?sslEnabled=true;trustStorePath=/etc/amq-secret-volume/broker.ts;trustStorePassword=${amq.truststore.password};verifyHost=false;trustAll=true</connector>
+      </connectors>
+
+      <disk-scan-period>5000</disk-scan-period>
+
+      <max-disk-usage>90</max-disk-usage>
+
+      <critical-analyzer>true</critical-analyzer>
+
+      <critical-analyzer-timeout>120000</critical-analyzer-timeout>
+
+      <critical-analyzer-check-period>60000</critical-analyzer-check-period>
+
+      <critical-analyzer-policy>HALT</critical-analyzer-policy>
+
+      <acceptors>
+         <acceptor name="artemis">tcp://0.0.0.0:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE;useEpoll=true;amqpCredits=1000;amqpLowCredits=300</acceptor>
+         <acceptor name="artemis-ssl">tcp://0.0.0.0:61617?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=CORE,AMQP,STOMP,HORNETQ,MQTT,OPENWIRE;useEpoll=true;amqpCredits=1000;amqpLowCredits=300;connectionsAllowed=1000;sslEnabled=true;keyStorePath=/etc/amq-secret-volume/broker.ks;keyStorePassword=${amq.keystore.password}</acceptor>
+      </acceptors>
+
+      <cluster-user>${amq.cluster.user}</cluster-user>
+
+      <cluster-password>${amq.cluster.password}</cluster-password>
+
+      <broadcast-groups>
+         <broadcast-group name="my-broadcast-group">
+            <jgroups-file>jgroups-ping.xml</jgroups-file>
+            <jgroups-channel>activemq_broadcast_channel</jgroups-channel>
+            <connector-ref>artemis</connector-ref>
+         </broadcast-group>
+      </broadcast-groups>
+
+      <discovery-groups>
+         <discovery-group name="my-discovery-group">
+            <jgroups-file>jgroups-ping.xml</jgroups-file>
+            <jgroups-channel>activemq_broadcast_channel</jgroups-channel>
+            <refresh-timeout>10000</refresh-timeout>
+         </discovery-group>
+      </discovery-groups>
+
+      <cluster-connections>
+         <cluster-connection name="my-cluster">
+            <connector-ref>artemis</connector-ref>
+            <retry-interval>1000</retry-interval>
+            <retry-interval-multiplier>2</retry-interval-multiplier>
+            <max-retry-interval>32000</max-retry-interval>
+            <initial-connect-attempts>20</initial-connect-attempts>
+            <reconnect-attempts>10</reconnect-attempts>
+            <use-duplicate-detection>true</use-duplicate-detection>
+            <message-load-balancing>ON_DEMAND</message-load-balancing>
+            <max-hops>1</max-hops>
+            <discovery-group-ref discovery-group-name="my-discovery-group"/>
+         </cluster-connection>
+      </cluster-connections>
+
+      <security-settings>
+         <security-setting match="#">
+            <permission type="createNonDurableQueue" roles="admin"/>
+            <permission type="deleteNonDurableQueue" roles="admin"/>
+            <permission type="createDurableQueue" roles="admin"/>
+            <permission type="deleteDurableQueue" roles="admin"/>
+            <permission type="createAddress" roles="admin"/>
+            <permission type="deleteAddress" roles="admin"/>
+            <permission type="consume" roles="admin"/>
+            <permission type="browse" roles="admin"/>
+            <permission type="send" roles="admin"/>
+            <permission type="manage" roles="admin"/>
+         </security-setting>
+      </security-settings>
+
+      <address-settings>
+         <address-setting match="activemq.management#">
+            <dead-letter-address>DLQ</dead-letter-address>
+            <expiry-address>ExpiryQueue</expiry-address>
+            <redelivery-delay>0</redelivery-delay>
+            <max-size-bytes>-1</max-size-bytes>
+            <message-counter-history-day-limit>10</message-counter-history-day-limit>
+            <address-full-policy>PAGE</address-full-policy>
+            <auto-create-queues>true</auto-create-queues>
+            <auto-create-addresses>true</auto-create-addresses>
+            <auto-create-jms-queues>true</auto-create-jms-queues>
+            <auto-create-jms-topics>true</auto-create-jms-topics>
+         </address-setting>
+         <address-setting match="#">
+            <redistribution-delay>0</redistribution-delay>
+            <dead-letter-address>DLQ</dead-letter-address>
+            <expiry-address>ExpiryQueue</expiry-address>
+            <redelivery-delay>0</redelivery-delay>
+            <max-size-bytes>-1</max-size-bytes>
+            <message-counter-history-day-limit>10</message-counter-history-day-limit>
+            <address-full-policy>PAGE</address-full-policy>
+            <auto-create-queues>true</auto-create-queues>
+            <auto-create-addresses>true</auto-create-addresses>
+            <auto-create-jms-queues>true</auto-create-jms-queues>
+            <auto-create-jms-topics>true</auto-create-jms-topics>
+         </address-setting>
+      </address-settings>
+
+      <addresses>
+         <address name="DLQ">
+            <anycast>
+               <queue name="DLQ" />
+            </anycast>
+         </address>
+         <address name="ExpiryQueue">
+            <anycast>
+               <queue name="ExpiryQueue" />
+            </anycast>
+         </address>
+         <address name="FOO">
+            <anycast>
+               <queue name="FOO" />
+            </anycast>
+         </address>
+         <address name="mirror.FOO">
+            <multicast>
+               <queue name="mirror.dc2.FOO" />
+            </multicast>
+         </address>
+         <address name="notification.idempotent-consumer">
+            <multicast>
+               <queue name="notification.idempotent-consumer.camel-consumer" />
+            </multicast>
+         </address>
+         <address name="mirror.notification.idempotent-consumer">
+            <multicast>
+               <queue name="mirror.dc2.notification.idempotent-consumer" />
+            </multicast>
+         </address>
+      </addresses>
+   
+      <diverts>
+         <divert name="divert.FOO">
+            <address>FOO</address>
+            <forwarding-address>mirror.FOO</forwarding-address>
+            <filter string="ARTEMIS_MESSAGE_ORIGIN = 'dc1' OR ARTEMIS_MESSAGE_ORIGIN IS NULL"/>
+            <exclusive>false</exclusive>
+         </divert>
+         <divert name="divert.notification.idempotent-consumer">
+            <address>notification.idempotent-consumer</address>
+            <forwarding-address>mirror.notification.idempotent-consumer</forwarding-address>
+            <filter string="ARTEMIS_MESSAGE_ORIGIN = 'dc1' OR ARTEMIS_MESSAGE_ORIGIN IS NULL"/>
+            <exclusive>true</exclusive>
+         </divert>
+      </diverts>
+
+      <bridges>
+         <bridge name="bridge.mirror.dc2.FOO">
+            <queue-name>mirror.dc2.FOO</queue-name>
+            <forwarding-address>FOO</forwarding-address>
+            <ha>true</ha>
+            <transformer>
+               <class-name>org.apache.activemq.examples.AddMessageOriginTransformer</class-name>
+               <property key="messageOrigin" value="dc1"/>
+            </transformer>
+            <failover-on-server-shutdown>true</failover-on-server-shutdown>
+            <user>${amq.user}</user>
+            <password>${amq.password}</password>
+            <static-connectors>
+               <connector-ref>dc2-connector</connector-ref>
+            </static-connectors>
+         </bridge>
+         <bridge name="bridge.mirror.dc2.notification.idempotent-consumer">
+            <queue-name>mirror.dc2.notification.idempotent-consumer</queue-name>
+            <forwarding-address>notification.idempotent-consumer</forwarding-address>
+            <ha>true</ha>
+            <transformer>
+               <class-name>org.apache.activemq.examples.AddMessageOriginTransformer</class-name>
+               <property key="messageOrigin" value="dc1"/>
+            </transformer>
+            <failover-on-server-shutdown>true</failover-on-server-shutdown>
+            <user>${amq.user}</user>
+            <password>${amq.password}</password>
+            <static-connectors>
+               <connector-ref>dc2-connector</connector-ref>
+            </static-connectors>
+         </bridge>
+      </bridges>
+   
+      <broker-plugins>
+         <broker-plugin class-name="org.apache.activemq.examples.AddMessageUuidPlugin"/>
+      </broker-plugins>
+   
+   </core>
+</configuration>

@@ -177,7 +177,6 @@ under the License.
             <dead-letter-address>DLQ</dead-letter-address>
             <expiry-address>ExpiryQueue</expiry-address>
             <redelivery-delay>0</redelivery-delay>
-            <!-- with -1 only the global-max-size is in use for limiting -->
             <max-size-bytes>-1</max-size-bytes>
             <message-counter-history-day-limit>10</message-counter-history-day-limit>
             <address-full-policy>PAGE</address-full-policy>
@@ -237,7 +236,7 @@ under the License.
       </diverts>
 
       <bridges>
-         <bridge name="bridge.mirror.dc1.FOO">
+         <bridge name="bridge.mirror.dc2.FOO">
             <queue-name>mirror.dc2.FOO</queue-name>
             <forwarding-address>FOO</forwarding-address>
             <ha>true</ha>
@@ -269,19 +268,9 @@ under the License.
          <connector name="dc2-connector">tcp://localhost:61617</connector>
       </connectors>
 
-      <!-- Uncomment the following if you want to use the Standard LoggingActiveMQServerPlugin pluging to log in events
-      <broker-plugins>
-         <broker-plugin class-name="org.apache.activemq.artemis.core.server.plugin.impl.LoggingActiveMQServerPlugin">
-            <property key="LOG_ALL_EVENTS" value="true"/>
-            <property key="LOG_CONNECTION_EVENTS" value="true"/>
-            <property key="LOG_SESSION_EVENTS" value="true"/>
-            <property key="LOG_CONSUMER_EVENTS" value="true"/>
-            <property key="LOG_DELIVERING_EVENTS" value="true"/>
-            <property key="LOG_SENDING_EVENTS" value="true"/>
-            <property key="LOG_INTERNAL_EVENTS" value="true"/>
-         </broker-plugin>
+       <broker-plugins>
+         <broker-plugin class-name="org.apache.activemq.examples.AddMessageUuidPlugin"/>
       </broker-plugins>
-      -->
 
    </core>
 </configuration>

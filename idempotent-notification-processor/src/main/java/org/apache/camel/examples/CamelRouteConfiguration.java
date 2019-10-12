@@ -23,7 +23,6 @@ import org.apache.camel.spi.ComponentCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +33,9 @@ public class CamelRouteConfiguration extends RouteBuilder {
 
   private static final String NOTIFICATION_TYPE_HEADER = "NotificationType";
   
+  @Autowired
+  private ConsumerProperties consumerProperties;
+  
   @Bean
   private ComponentCustomizer<AMQPComponent> amqpComponentCustomizer(ConnectionFactory jmsConnectionFactory) {
     return (component) -> {
@@ -43,54 +45,57 @@ public class CamelRouteConfiguration extends RouteBuilder {
   
   @Bean
   @Autowired
-  private JdbcMessageIdRepository jdbcMessageIdRepository(DataSource dataSource, @Value("${consumer.notification.application-name}") String processorName) {
-    JdbcMessageIdRepository jdbcMessageIdRepository = new JdbcMessageIdRepository(dataSource, processorName);
+  private JdbcMessageIdRepository jdbcMessageIdRepository(DataSource dataSource) {
+    JdbcMessageIdRepository jdbcMessageIdRepository = new JdbcMessageIdRepository(dataSource, consumerProperties.getNotification().getApplicationName());
     return jdbcMessageIdRepository;
   }
   
   @Override
   public void configure() {
     
-    from("amqp:topic://{{consumer.notification.topic-name}}::{{consumer.notification.topic-name}}.{{consumer.notification.application-name}}")
+    fromF("amqp:topic://%1$s::%1$s.%2$s", consumerProperties.getNotification().getTopicName(), consumerProperties.getNotification().getApplicationName())
       .choice()
-        .when(simple(String.format("${headers.%s} =~ 'ADD'", NOTIFICATION_TYPE_HEADER)))
+        .when(simpleF("${headers.%s} =~ 'ADD'", NOTIFICATION_TYPE_HEADER))
           .to("direct:add")
-        .when(simple(String.format("${headers.%s} =~ 'REMOVE'", NOTIFICATION_TYPE_HEADER)))
+        .when(simpleF("${headers.%s} =~ 'REMOVE'", NOTIFICATION_TYPE_HEADER))
           .to("direct:remove")
-        .when(simple(String.format("${headers.%s} =~ 'CONFIRM'", NOTIFICATION_TYPE_HEADER)))
+        .when(simpleF("${headers.%s} =~ 'CONFIRM'", NOTIFICATION_TYPE_HEADER))
           .to("direct:confirm")
         .otherwise()
-          .log(LoggingLevel.INFO, log, String.format("Not sure how to handle type ${headers.%s} for message ${body}", NOTIFICATION_TYPE_HEADER))
+          .log(LoggingLevel.INFO, log, String.format("Not sure how to handle type [${headers.%s}] for message [${body}]", NOTIFICATION_TYPE_HEADER))
       .end()
     ;
     
     from("direct:add")
+      .setHeader("MessageID", body())
       .to("bean:jdbcMessageIdRepository?method=add(${body})")
       .choice()
         .when(body())
-          .log(LoggingLevel.DEBUG, log, "Manually added id to repository: ${body}")
+          .log(LoggingLevel.DEBUG, log, "Manually added id to repository: [${header.MessageID}]")
         .otherwise()
-          .log(LoggingLevel.DEBUG, log, "Unable to manually add id to repository.")
+          .log(LoggingLevel.DEBUG, log, "Unable to manually add id to repository: [${header.MessageID}]")
       .end()
     ;
     
     from("direct:remove")
+      .setHeader("MessageID", body())
       .to("bean:jdbcMessageIdRepository?method=remove(${body})")
       .choice()
         .when(body())
-          .log(LoggingLevel.DEBUG, log, "Manually removed id from repository: ${body}")
+          .log(LoggingLevel.DEBUG, log, "Manually removed id from repository: [${header.MessageID}]")
         .otherwise()
-          .log(LoggingLevel.DEBUG, log, "Unable to manually remove id from repository.")
+          .log(LoggingLevel.DEBUG, log, "Unable to manually remove id from repository: [${header.MessageID}]")
       .end()
     ;
     
     from("direct:confirm")
+      .setHeader("MessageID", body())
       .to("bean:jdbcMessageIdRepository?method=confirm(${body})")
       .choice()
         .when(body())
-          .log(LoggingLevel.DEBUG, log, "Manually confirmed id in repository: ${body}")
+          .log(LoggingLevel.DEBUG, log, "Manually confirmed id in repository: [${header.MessageID}]")
         .otherwise()
-          .log(LoggingLevel.DEBUG, log, "Unable to manually confirm id in repository.")
+          .log(LoggingLevel.DEBUG, log, "Unable to manually confirm id in repository: [${header.MessageID}]")
       .end()
     ;
   }

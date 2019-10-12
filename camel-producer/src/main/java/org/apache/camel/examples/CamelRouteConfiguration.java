@@ -46,7 +46,10 @@ public class CamelRouteConfiguration extends RouteBuilder {
   public void configure() {
     
     from("stream:in?promptMessage=RAW(> )&initialPromptDelay=0")
-      .setHeader(MESSAGE_UUID_HEADER, simple("ref:uuid"))
+      .filter(simple("${body} == ${null} || ${body} == ''"))
+        .stop()
+      .end()
+      //.setHeader(MESSAGE_UUID_HEADER, simple("ref:uuid")) /* If you use the broker plugin, then this header is optional. */
       .log(LoggingLevel.DEBUG, log, String.format("Sending message [${header.%s}]: ${body}", MESSAGE_UUID_HEADER))
       .to(ExchangePattern.InOnly, "amqp:{{amqp.destination.type:queue}}://{{amqp.destination.name}}")
     ;
