@@ -19,8 +19,8 @@ $ARTEMIS_HOME/bin/artemis create --name dc2 --user client --password password --
 ```
 cd $PROJECT_ROOT/artemis-transformers
 mvn clean install
-cp target/artemis-transformers-*.jar $PROJECT_ROOT/brokers/dc1/
-cp target/artemis-transformers-*.jar $PROJECT_ROOT/brokers/dc2/
+cp target/artemis-transformers-*.jar $PROJECT_ROOT/brokers/dc1/lib/
+cp target/artemis-transformers-*.jar $PROJECT_ROOT/brokers/dc2/lib/
 ```
 
 - Run the broker instances in separate terminals/windows.
